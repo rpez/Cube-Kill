@@ -8,6 +8,7 @@ public partial struct CubeSpawnSystem : ISystem
 {
     private Random random;
 
+
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<Spawner>();

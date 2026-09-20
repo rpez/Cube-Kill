@@ -217,7 +217,7 @@ MonoBehaviour:
   Prefab: {fileID: 1317286337776480699, guid: f451524838caa1e429f967ce4697bb7c, type: 3}
   SpawnAmount: 10000
   Spread: 200
-  DistanceBetweenArmies: 500
+  DistanceBetweenArmies: 400
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

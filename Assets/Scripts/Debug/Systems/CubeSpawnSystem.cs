@@ -35,6 +35,12 @@ public partial struct CubeSpawnSystem : ISystem
             state.EntityManager.AddComponentData(
                 newEntity,
                 new MaterialProperties { BaseColor = GetColorForTeam(team) });
+            state.EntityManager.AddComponentData(
+                newEntity,
+                new MeleeTargeting());
+            state.EntityManager.AddComponentData(
+                newEntity,
+                new Target { CurrentTargetEntity = Entity.Null, CurrentTargetPosition = float3.zero });
             state.EntityManager.AddSharedComponent(
                 newEntity,
                 new Team { TeamID = team });

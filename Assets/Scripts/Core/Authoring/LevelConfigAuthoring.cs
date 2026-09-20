@@ -20,11 +20,17 @@ class LevelConfigBaker : Baker<LevelConfigAuthoring>
     {
         Entity entity = GetEntity(TransformUsageFlags.None);
 
-        AddComponent(entity, new GridConfig
+        AddComponent(entity, new GridConfigSingleton
         {
             CellSize = authoring.CellSize,
             MapMin = authoring.MapMin,
-            MapMax = authoring.MapMax
+            MapMax = authoring.MapMax,
+            MapCellMin = new int2(
+                (int)math.floor(authoring.MapMin[0] / authoring.CellSize),
+                (int)math.floor(authoring.MapMin[1] / authoring.CellSize)),
+            MapCellMax = new int2(
+                (int)math.floor(authoring.MapMax[0] / authoring.CellSize),
+                (int)math.floor(authoring.MapMax[1] / authoring.CellSize))
         });
     }
 }

@@ -11,7 +11,7 @@ public partial struct GridSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<LocalTransform>();
-        state.RequireForUpdate<GridConfig>();
+        state.RequireForUpdate<GridConfigSingleton>();
 
         state.EntityManager.CreateEntity(typeof(SpatialGridSingleton));
     }
@@ -22,7 +22,10 @@ public partial struct GridSystem : ISystem
         RefRW<SpatialGridSingleton> gridSingleton = SystemAPI.GetSingletonRW<SpatialGridSingleton>();
 
         if (gridSingleton.ValueRO.Grid.IsCreated)
+        {
+            state.EntityManager.CompleteAllTrackedJobs();
             gridSingleton.ValueRW.Grid.Dispose();
+        }
 
         EntityQuery query = SystemAPI.QueryBuilder()
             .WithAll<LocalTransform, Team>()
@@ -30,7 +33,7 @@ public partial struct GridSystem : ISystem
             .Build();
         int aliveCount = query.CalculateEntityCount();
 
-        GridConfig config = SystemAPI.GetSingleton<GridConfig>();
+        GridConfigSingleton config = SystemAPI.GetSingleton<GridConfigSingleton>();
         NativeParallelMultiHashMap<CellTeamKey, Entity> grid =
             new NativeParallelMultiHashMap<CellTeamKey, Entity>(aliveCount, Allocator.TempJob);
         NativeParallelMultiHashMap<CellTeamKey, Entity>.ParallelWriter parallelWriter = grid.AsParallelWriter();

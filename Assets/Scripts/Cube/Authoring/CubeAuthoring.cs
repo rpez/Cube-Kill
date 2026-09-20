@@ -54,14 +54,5 @@ class CubeBaker : Baker<CubeAuthoring>
             Direction = float3.zero,
             Speed = authoring.Speed
         });
-        AddComponent(entity, new Target
-        {
-            CurrentTargetEntity = Entity.Null,
-            CurrentTargetPosition = float3.zero
-        });
-        AddSharedComponent(entity, new Team
-        {
-            TeamID = authoring.TeamID
-        });
     }
 }

@@ -24,7 +24,10 @@ public partial struct GridSystem : ISystem
         if (gridSingleton.ValueRO.Grid.IsCreated)
             gridSingleton.ValueRW.Grid.Dispose();
 
-        EntityQuery query = SystemAPI.QueryBuilder().WithNone<Dead>().Build();
+        EntityQuery query = SystemAPI.QueryBuilder()
+            .WithAll<LocalTransform, Team>()
+            .WithNone<Dead>()
+            .Build();
         int aliveCount = query.CalculateEntityCount();
 
         GridConfig config = SystemAPI.GetSingleton<GridConfig>();

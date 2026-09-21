@@ -7,26 +7,36 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(TargetingSystemGroup))]
 public partial struct MeleeCubeSystem : ISystem
 {
+    private const int MeleeRetargetInterval = 15; // hardcoded for now
+
     public void OnCreate(ref SystemState state)
     {
-
+        state.RequireForUpdate<SpatialGridSingleton>();
+        state.RequireForUpdate<GridConfigSingleton>();
     }
 
     public void OnUpdate(ref SystemState state)
     {
         SpatialGridSingleton gridSingleton = SystemAPI.GetSingleton<SpatialGridSingleton>();
         GridConfigSingleton gridConfig = SystemAPI.GetSingleton<GridConfigSingleton>();
+        BattleTimerSingleton tick = SystemAPI.GetSingleton<BattleTimerSingleton>();
+        bool writeToA = !gridSingleton.UseA;
 
-        if (!gridSingleton.Grid.IsCreated) return;
+        ref var gridSnapshot = ref (writeToA
+            ? ref gridSingleton.GridA
+            : ref gridSingleton.GridB);
+        if (!gridSnapshot.IsCreated) return;
 
         MeleeTargetingJob job = new MeleeTargetingJob
         {
-            Grid = gridSingleton.Grid,
+            Grid = gridSnapshot,
             TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
             CellSize = gridConfig.CellSize,
             MapCellMin = gridConfig.MapCellMin,
             MapCellMax = gridConfig.MapCellMax,
-            TeamCount = 2 // or read from config if this becomes dynamic later
+            TeamCount = 2, // hardcoded for now
+            CurrentTick = tick.CurrentTick,
+            RetargetInterval = MeleeRetargetInterval
         };
 
         state.Dependency = job.ScheduleParallel(state.Dependency);
@@ -44,9 +54,19 @@ partial struct MeleeTargetingJob : IJobEntity
     public int2 MapCellMin;
     public int2 MapCellMax;
     public int TeamCount;
+    public int CurrentTick;
+    public int RetargetInterval;
 
-    void Execute(ref Target target, ref Move move, in LocalTransform transform, in Team team)
+    void Execute(Entity entity, ref Target target, ref Move move, in LocalTransform transform, in Team team)
     {
+        bool targetInvalid = target.CurrentTargetEntity == Entity.Null
+            || !TransformLookup.HasComponent(target.CurrentTargetEntity);
+
+        // Batch the cube updates, offset using entity index
+        bool isMyRetargetTick = (CurrentTick + entity.Index) % RetargetInterval == 0;
+
+        if (!targetInvalid && !isMyRetargetTick) return; 
+
         int2 ownCell = new int2(
             (int)math.floor(transform.Position.x / CellSize),
             (int)math.floor(transform.Position.z / CellSize)

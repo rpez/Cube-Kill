@@ -1,9 +1,8 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(TargetingSystemGroup))]
 public partial struct MoveSystem : ISystem
 {

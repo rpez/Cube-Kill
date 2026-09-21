@@ -8,6 +8,9 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 public partial struct GridSystem : ISystem
 {
+    private int tickCounter;
+    private const int RebuildInterval = 10; // hardcoded for now
+
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<LocalTransform>();
@@ -15,17 +18,25 @@ public partial struct GridSystem : ISystem
 
         state.EntityManager.CreateEntity(typeof(SpatialGridSingleton));
     }
+    
+    public void OnDestroy(ref SystemState state)
+    {
+        SpatialGridSingleton gridSingleton = SystemAPI.GetSingleton<SpatialGridSingleton>();
+        if (gridSingleton.GridA.IsCreated) gridSingleton.GridA.Dispose();
+        if (gridSingleton.GridB.IsCreated) gridSingleton.GridB.Dispose();
+    }
 
-    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        RefRW<SpatialGridSingleton> gridSingleton = SystemAPI.GetSingletonRW<SpatialGridSingleton>();
+        tickCounter++;
+        if (tickCounter % RebuildInterval != 0) return; // Reduce update rate to improve performance and race conditions
 
-        if (gridSingleton.ValueRO.Grid.IsCreated)
-        {
-            state.EntityManager.CompleteAllTrackedJobs();
-            gridSingleton.ValueRW.Grid.Dispose();
-        }
+        RefRW<SpatialGridSingleton> gridSingleton = SystemAPI.GetSingletonRW<SpatialGridSingleton>();
+        bool writeToA = !gridSingleton.ValueRO.UseA;
+
+        ref var writeGrid = ref (writeToA
+            ? ref gridSingleton.ValueRW.GridA
+            : ref gridSingleton.ValueRW.GridB);
 
         EntityQuery query = SystemAPI.QueryBuilder()
             .WithAll<LocalTransform, Team>()
@@ -33,20 +44,20 @@ public partial struct GridSystem : ISystem
             .Build();
         int aliveCount = query.CalculateEntityCount();
 
-        GridConfigSingleton config = SystemAPI.GetSingleton<GridConfigSingleton>();
-        NativeParallelMultiHashMap<CellTeamKey, Entity> grid =
-            new NativeParallelMultiHashMap<CellTeamKey, Entity>(aliveCount, Allocator.TempJob);
-        NativeParallelMultiHashMap<CellTeamKey, Entity>.ParallelWriter parallelWriter = grid.AsParallelWriter();
+        if (writeGrid.IsCreated) writeGrid.Clear();
+        else writeGrid = new NativeParallelMultiHashMap<CellTeamKey, Entity>(aliveCount, Allocator.Persistent);
+        NativeParallelMultiHashMap<CellTeamKey, Entity>.ParallelWriter parallelWriter = writeGrid.AsParallelWriter();
 
+        GridConfigSingleton config = SystemAPI.GetSingleton<GridConfigSingleton>();
         BuildGridJob job = new BuildGridJob
         {
             CellSize = config.CellSize,
             GridWriter = parallelWriter
         };
-        
+
         state.Dependency = job.ScheduleParallel(query, state.Dependency);
 
-        gridSingleton.ValueRW.Grid = grid;
+        gridSingleton.ValueRW.UseA = writeToA;
     }
 }
 

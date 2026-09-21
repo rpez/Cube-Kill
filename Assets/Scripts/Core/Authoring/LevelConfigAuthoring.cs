@@ -10,6 +10,7 @@ public class LevelConfigAuthoring : MonoBehaviour
 
     [Header("FLOAT2")]
     [Header("Grid")]
+    public float2 MapCenter;
     public float2 MapMin;
     public float2 MapMax;
 }
@@ -23,6 +24,7 @@ class LevelConfigBaker : Baker<LevelConfigAuthoring>
         AddComponent(entity, new GridConfigSingleton
         {
             CellSize = authoring.CellSize,
+            MapCenter = authoring.MapCenter,
             MapMin = authoring.MapMin,
             MapMax = authoring.MapMax,
             MapCellMin = new int2(

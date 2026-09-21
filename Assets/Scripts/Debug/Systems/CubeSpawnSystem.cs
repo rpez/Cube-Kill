@@ -29,8 +29,8 @@ public partial struct CubeSpawnSystem : ISystem
             state.EntityManager.SetComponentData(
                 newEntity,
                 LocalTransform.FromPosition(randomOffset + new float3(
-                    -1f * team * spawner.DistanceBetweenArmies * 0.5f,
-                    0.5f,
+                    -1f * (team * 2f - 1f) * spawner.DistanceBetweenArmies * 0.5f,
+                    0f,
                     0f)));
             state.EntityManager.AddComponentData(
                 newEntity,

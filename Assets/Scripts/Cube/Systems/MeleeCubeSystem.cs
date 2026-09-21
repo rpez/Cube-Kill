@@ -31,6 +31,7 @@ public partial struct MeleeCubeSystem : ISystem
             Grid = gridSnapshot,
             TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
             CellSize = gridConfig.CellSize,
+            MapCenter = gridConfig.MapCenter,
             MapCellMin = gridConfig.MapCellMin,
             MapCellMax = gridConfig.MapCellMax,
             TeamCount = 2, // hardcoded for now
@@ -50,6 +51,7 @@ partial struct MeleeTargetingJob : IJobEntity
     [ReadOnly] public NativeParallelMultiHashMap<CellTeamKey, Entity> Grid;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
     public float CellSize;
+    public float2 MapCenter;
     public int2 MapCellMin;
     public int2 MapCellMax;
     public int TeamCount;
@@ -64,7 +66,7 @@ partial struct MeleeTargetingJob : IJobEntity
         // Batch the cube updates, offset using entity index
         bool isMyRetargetTick = (CurrentTick + entity.Index) % RetargetInterval == 0;
 
-        if (!targetInvalid && !isMyRetargetTick) return; 
+        if (!targetInvalid && !isMyRetargetTick) return;
 
         int2 ownCell = new int2(
             (int)math.floor(transform.Position.x / CellSize),
@@ -104,15 +106,9 @@ partial struct MeleeTargetingJob : IJobEntity
         }
 
         target.CurrentTargetEntity = nearest;
-        if (nearest == Entity.Null)
-        {
-            target.CurrentTargetPosition = transform.Position;
-            move.Direction = float3.zero;
-        }
-        else
-        {
-            target.CurrentTargetPosition = TransformLookup[nearest].Position;
-            move.Direction = math.normalize(target.CurrentTargetPosition - transform.Position);
-        }
+        target.CurrentTargetPosition = nearest == Entity.Null
+            ? new float3(MapCenter[0], 0f, MapCenter[1])
+            : TransformLookup[nearest].Position;
+        move.Direction = math.normalize(target.CurrentTargetPosition - transform.Position);
     }
 }

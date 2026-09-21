@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(TargetingSystemGroup))]
-public partial struct MeleeCubeSystem : ISystem
+public partial struct MeleeTargetingSystem : ISystem
 {
     private const int MeleeRetargetInterval = 15; // hardcoded for now
 
@@ -13,13 +13,14 @@ public partial struct MeleeCubeSystem : ISystem
     {
         state.RequireForUpdate<SpatialGridSingleton>();
         state.RequireForUpdate<GridConfigSingleton>();
+        state.RequireForUpdate<BattleTimerSingleton>();
     }
 
     public void OnUpdate(ref SystemState state)
     {
         SpatialGridSingleton gridSingleton = SystemAPI.GetSingleton<SpatialGridSingleton>();
         GridConfigSingleton gridConfig = SystemAPI.GetSingleton<GridConfigSingleton>();
-        BattleTimerSingleton tick = SystemAPI.GetSingleton<BattleTimerSingleton>();
+        BattleTimerSingleton timer = SystemAPI.GetSingleton<BattleTimerSingleton>();
 
         ref var gridSnapshot = ref (gridSingleton.UseA
             ? ref gridSingleton.GridA
@@ -35,7 +36,7 @@ public partial struct MeleeCubeSystem : ISystem
             MapCellMin = gridConfig.MapCellMin,
             MapCellMax = gridConfig.MapCellMax,
             TeamCount = 2, // hardcoded for now
-            CurrentTick = tick.CurrentTick,
+            CurrentTick = timer.CurrentTick,
             RetargetInterval = MeleeRetargetInterval
         };
 

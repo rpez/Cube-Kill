@@ -10,6 +10,7 @@ public class CubeAuthoring : MonoBehaviour
     public float Range;
     public float ArmorPenetration;
     public float AttackTravelSpeed;
+    public float AttackCooldown;
     [Header("Defence")]
     public float Armor;
     [Header("Health")]
@@ -38,6 +39,7 @@ class CubeBaker : Baker<CubeAuthoring>
             Range = authoring.Range,
             ArmorPenetration = authoring.ArmorPenetration,
             AttackTravelSpeed = authoring.AttackTravelSpeed,
+            AttackCooldown = authoring.AttackCooldown,
             AOE = authoring.AOE
         });
         AddComponent(entity, new Defence

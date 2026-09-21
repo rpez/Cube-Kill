@@ -55,7 +55,7 @@ public partial struct GridSystem : ISystem
             GridWriter = parallelWriter
         };
 
-        state.Dependency = job.ScheduleParallel(query, state.Dependency);
+        state.Dependency = job.ScheduleParallel(state.Dependency);
 
         gridSingleton.ValueRW.UseA = writeToA;
     }

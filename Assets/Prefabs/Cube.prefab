@@ -51,6 +51,7 @@ MonoBehaviour:
   Range: 1.5
   ArmorPenetration: 0
   AttackTravelSpeed: 10
+  AttackCooldown: 300
   Armor: 0
   StartingHealth: 100
   Speed: 5

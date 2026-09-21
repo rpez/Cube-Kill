@@ -4,9 +4,7 @@ A Unity DOTS/ECS auto-battler prototype: two armies of cubes spawn facing each o
 
 ## Demo
 
-<video src="docs/media/cube-kill-demo.mp4" controls width="720">
-  Your viewer doesn't support embedded video — download it directly: <a href="docs/media/demo.mp4">docs/media/demo.mp4</a>.
-</video>
+https://github.com/user-attachments/assets/b52167f5-a814-4542-b360-1999b56e4058
 
 ## Tech stack
 

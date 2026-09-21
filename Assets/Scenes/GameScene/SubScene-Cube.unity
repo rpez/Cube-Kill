@@ -218,9 +218,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CubeSpawnAuthoring
   Prefab: {fileID: 1317286337776480699, guid: f451524838caa1e429f967ce4697bb7c, type: 3}
-  SpawnAmount: 100000
-  Spread: 500
-  DistanceBetweenArmies: 700
+  SpawnAmount: 20000
+  Spread: 400
+  DistanceBetweenArmies: 500
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

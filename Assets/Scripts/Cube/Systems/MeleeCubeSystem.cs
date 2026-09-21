@@ -20,9 +20,8 @@ public partial struct MeleeCubeSystem : ISystem
         SpatialGridSingleton gridSingleton = SystemAPI.GetSingleton<SpatialGridSingleton>();
         GridConfigSingleton gridConfig = SystemAPI.GetSingleton<GridConfigSingleton>();
         BattleTimerSingleton tick = SystemAPI.GetSingleton<BattleTimerSingleton>();
-        bool writeToA = !gridSingleton.UseA;
 
-        ref var gridSnapshot = ref (writeToA
+        ref var gridSnapshot = ref (gridSingleton.UseA
             ? ref gridSingleton.GridA
             : ref gridSingleton.GridB);
         if (!gridSnapshot.IsCreated) return;
